@@ -1,9 +1,10 @@
 {
   "name": "wedding-invite-app",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "main": "index.ts",
+ "scripts": {
+    "start": "node src/app.ts",
+    "dev": "nodemon src/app.ts"
   },
   "keywords": [],
   "author": "",
@@ -35,8 +36,5 @@
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
-  },
-  "scripts": {
-  "dev": "ts-node-dev app.ts"
-}
+  }
 }
