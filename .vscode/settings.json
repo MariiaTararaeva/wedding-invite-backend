@@ -3,5 +3,11 @@
         "activityBar.background": "#1F3301",
         "titleBar.activeBackground": "#2C4702",
         "titleBar.activeForeground": "#F2FEE0"
-    }
+    },
+    
+        "files.exclude": {
+          "dist": true
+        } // hide dist folder - js compiler output
+      
+      
 }
