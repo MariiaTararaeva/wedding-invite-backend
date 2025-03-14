@@ -1,26 +1,30 @@
 import { Router, Request, Response, NextFunction } from "express";
-import prisma from "../../prisma/client";   
+import { PrismaClient } from "@prisma/client";
 
 const router = Router();
+const prisma = new PrismaClient();
   
-// POST /api/invitations
-router.post("/", async (req: Request, res: Response, next: NextFunction) => {
-  const { id, email, password, } = req.body;
+// POST /api/users
+router.get("/:id", async (req: Request, res: Response, next: NextFunction):  Promise<void>=> {
+    const { id } = req.params;
+    console.log("User route hit for ID:", id);  // <-- Add this
 
-  try {
-    const user = await prisma.user.create({
-      data: {
-        id,
-        email,
-        password,
-      },
-    });
-    res.status(201).json(user);
-  } catch (error) {
-    next(error);
-  }
-});
-
+  
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: Number(id) },
+      });
+  
+      if (!user) {
+         res.status(404).json({ message: "User not found" });
+        return;
+      }
+  
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  });
 // // GET all
 // router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 //     const userId = req.userId;
