@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "index.ts",
  "scripts": {
-    "start": "node src/app.ts",
-    "dev": "nodemon src/app.ts"
-  },
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev src/server.ts"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -33,6 +34,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/morgan": "^1.9.9",
     "@types/multer": "^1.4.12",
+    "@types/node": "^22.13.10",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
