@@ -11,17 +11,20 @@ model User {
   id       Int    @id @default(autoincrement())
   email    String @unique
   password String
-  invitations Invitation[]
+  deletedAt    DateTime?     // ← Soft delete field
+  invitations Invitation[] 
 }
 
 model Invitation {
   id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
+  userId      Int?
+  user        User?     @relation(fields: [userId], references: [id])
+  guestId     String?  // ← used to temporarily link to a guest info from cookies to attach their invite creted while not auth to their account when they do log in
   template    String
   names       String
   weddingDate DateTime
   venue       String
   rsvpLink    String?
-  isPaid Boolean @default(false)
+  isPaid Boolean @default(false) // ← to use when billing is enabled 
+  deletedAt   DateTime? // ← For soft-deleting individual invitations
 }

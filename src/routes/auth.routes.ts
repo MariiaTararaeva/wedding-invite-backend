@@ -12,7 +12,7 @@ interface AuthenticatedRequest extends Request {
 
 // Signup
 router.post("/signup", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { email, password } = req.body;
+  const { email, password, guestId } = req.body;
 
   if (!email || !password) {
     res.status(400).json({ message: "Email and password required" });
@@ -33,6 +33,13 @@ router.post("/signup", async (req: Request, res: Response, next: NextFunction): 
       data: { email, password: hashedPassword },
     });
 
+    if (guestId) {
+      await prisma.invitation.updateMany({
+        where: { userId: null, guestId },
+        data: { userId: newUser.id, guestId: null },
+      });
+    } // Update invitations created as guest with the new user ID when a guest signs up
+
     res.status(201).json({ user: { id: newUser.id, email: newUser.email }, message: "User created" });
   } catch (err) {
     next(err);
@@ -41,7 +48,7 @@ router.post("/signup", async (req: Request, res: Response, next: NextFunction): 
 
 // Login
 router.post("/login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { email, password } = req.body;
+  const { email, password, guestId } = req.body;
 
   if (!email || !password) {
      res.status(400).json({ message: "Email and password required" });
@@ -61,13 +68,20 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
         return;
     }
 
+    if (guestId) {
+      await prisma.invitation.updateMany({
+        where: { userId: null, guestId },
+        data: { userId: user.id, guestId: null },
+      });
+    } // Update invitations created as guest with the user ID when a guest logs in
+    
     const payload = { userId: user.id, email: user.email };
     const token = jwt.sign(payload, process.env.TOKEN_SECRET as string, {
       algorithm: "HS256",
       expiresIn: "6h",
     });
 
-    res.json({ token: token + "my token" }); 
+    res.json({ token: token + "Login successful"}); 
   } catch (err) {
     next(err);
   }

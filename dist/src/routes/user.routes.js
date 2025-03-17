@@ -8,40 +8,44 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const client_1 = __importDefault(require("../../prisma/client"));
+const client_1 = require("@prisma/client");
 const router = (0, express_1.Router)();
-// POST /api/invitations
-router.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id, email, password, } = req.body;
+const prisma = new client_1.PrismaClient();
+// // GET /api/user/{id}
+// router.get("/:id", async (req: Request, res: Response, next: NextFunction):  Promise<void>=> {
+//     const { id } = req.params;
+//     console.log("User route hit for ID:", id);  // <-- Add this
+//     try {
+//       const user = await prisma.user.findUnique({
+//         where: { id: Number(id) },
+//       });
+//       if (!user) {
+//          res.status(404).json({ message: "User not found" });
+//         return;
+//       }
+//       res.json(user);
+//     } catch (error) {
+//       next(error);
+//     }
+//   });
+// GET all
+router.get("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    console.log("All users route by ID", id);
     try {
-        const user = yield client_1.default.user.create({
-            data: {
-                id,
-                email,
-                password,
-            },
-        });
-        res.status(201).json(user);
+        const user = yield prisma.user.findUnique({ where: { id: Number(id) } });
+        if (!user) {
+            res.status(404).json({ message: "No users found" });
+            return;
+        }
+        res.json(user);
     }
     catch (error) {
         next(error);
     }
 }));
-// // GET all
-// router.get("/", async (req: Request, res: Response, next: NextFunction) => {
-//     const userId = req.userId;
-//   try {
-//     const user = await prisma.user.findMany({ where: { userId } });
-//     res.json(userId);
-//   } catch (error) {
-//     next(error);
-//   }
-// });
 // // GET one
 // router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
 //   const userId = req.userId;

@@ -14,7 +14,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/invitations", invitationRoutes);
-app.use("/api/user", userRoutes);
+app.use("/api/users", userRoutes);
 
 // ⛔️ Catch-all route for 404s
 app.use("*", (req, res) => {
