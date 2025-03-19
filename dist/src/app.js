@@ -19,7 +19,7 @@ app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use("/api/auth", auth_routes_1.default);
 app.use("/api/invitations", invitation_routes_1.default);
-app.use("/api/user", user_routes_1.default);
+app.use("/api/users", user_routes_1.default);
 // ⛔️ Catch-all route for 404s
 app.use("*", (req, res) => {
     res.status(404).json({ success: false, error: "Endpoint not found" });

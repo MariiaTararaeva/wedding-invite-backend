@@ -22,8 +22,8 @@ router.post("/signup", async (req: Request, res: Response, next: NextFunction): 
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-       res.status(400).json({ message: "Email already in use" });
-       return;
+      res.status(400).json({ message: "Email already in use" });
+      return;
     }
 
     const salt = bcrypt.genSaltSync(12);
@@ -33,18 +33,32 @@ router.post("/signup", async (req: Request, res: Response, next: NextFunction): 
       data: { email, password: hashedPassword },
     });
 
+    // Link guest invitations if a guestId exists
     if (guestId) {
       await prisma.invitation.updateMany({
         where: { userId: null, guestId },
         data: { userId: newUser.id, guestId: null },
       });
-    } // Update invitations created as guest with the new user ID when a guest signs up
+    }
 
-    res.status(201).json({ user: { id: newUser.id, email: newUser.email }, message: "User created" });
+    // Generate a JWT token just like in login
+    const payload = { userId: newUser.id, email: newUser.email };
+    const token = jwt.sign(payload, process.env.TOKEN_SECRET as string, {
+      algorithm: "HS256",
+      expiresIn: "6h",
+    });
+
+    // Return the token + user to the frontend
+    res.status(201).json({
+      user: { id: newUser.id, email: newUser.email },
+      token,
+      message: "User created"
+    });
   } catch (err) {
     next(err);
   }
-}); 
+});
+
 
 // Login
 router.post("/login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -81,8 +95,12 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
       expiresIn: "6h",
     });
 
-    res.json({ token: token + "Login successful"}); 
-  } catch (err) {
+    res.json({
+      message: "Login successful",
+      token,
+      user: { id: user.id, email: user.email }
+    })
+    } catch (err) {
     next(err);
   }
 });
@@ -102,3 +120,4 @@ router.get("/verify", isAuthenticated, async (req: AuthenticatedRequest, res: Re
 });
 
 export default router;
+//

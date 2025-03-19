@@ -20,7 +20,7 @@ const route_guard_middleware_1 = require("../middleware/route-guard-middleware")
 const router = express_1.default.Router();
 // Signup
 router.post("/signup", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, password } = req.body;
+    const { email, password, guestId } = req.body;
     if (!email || !password) {
         res.status(400).json({ message: "Email and password required" });
         return;
@@ -36,6 +36,12 @@ router.post("/signup", (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         const newUser = yield client_1.default.user.create({
             data: { email, password: hashedPassword },
         });
+        if (guestId) {
+            yield client_1.default.invitation.updateMany({
+                where: { userId: null, guestId },
+                data: { userId: newUser.id, guestId: null },
+            });
+        } // Update invitations created as guest with the new user ID when a guest signs up
         res.status(201).json({ user: { id: newUser.id, email: newUser.email }, message: "User created" });
     }
     catch (err) {
@@ -44,7 +50,7 @@ router.post("/signup", (req, res, next) => __awaiter(void 0, void 0, void 0, fun
 }));
 // Login
 router.post("/login", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, password } = req.body;
+    const { email, password, guestId } = req.body;
     if (!email || !password) {
         res.status(400).json({ message: "Email and password required" });
         return;
@@ -60,12 +66,22 @@ router.post("/login", (req, res, next) => __awaiter(void 0, void 0, void 0, func
             res.status(401).json({ message: "Invalid credentials" });
             return;
         }
+        if (guestId) {
+            yield client_1.default.invitation.updateMany({
+                where: { userId: null, guestId },
+                data: { userId: user.id, guestId: null },
+            });
+        } // Update invitations created as guest with the user ID when a guest logs in
         const payload = { userId: user.id, email: user.email };
         const token = jsonwebtoken_1.default.sign(payload, process.env.TOKEN_SECRET, {
             algorithm: "HS256",
             expiresIn: "6h",
         });
-        res.json({ token: token + "my token" });
+        res.json({
+            message: "Login successful",
+            token,
+            user: { id: user.id, email: user.email }
+        });
     }
     catch (err) {
         next(err);
@@ -86,3 +102,4 @@ router.get("/verify", route_guard_middleware_1.isAuthenticated, (req, res, next)
     }
 }));
 exports.default = router;
+//
