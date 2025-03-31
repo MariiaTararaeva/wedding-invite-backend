@@ -14,7 +14,8 @@ const configureMiddleware = (app) => {
     app.set("trust proxy", 1);
     // Enable CORS
     app.use((0, cors_1.default)({
-        origin: [FRONTEND_URL],
+        origin: 'http://localhost:5173',
+        credentials: true,
     }));
     // Logging middleware (only used in development by default)
     app.use((0, morgan_1.default)("dev"));

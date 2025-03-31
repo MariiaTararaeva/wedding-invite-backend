@@ -8,23 +8,50 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  password String
-  deletedAt    DateTime?     // ← Soft delete field
-  invitations Invitation[] 
+  id          String       @id @default(uuid())
+  email       String       @unique
+  password    String
+  deletedAt   DateTime?
+  invitations Invitation[]
 }
 
 model Invitation {
-  id          Int      @id @default(autoincrement())
-  userId      Int?
-  user        User?     @relation(fields: [userId], references: [id])
-  guestId     String?  // ← used to temporarily link to a guest info from cookies to attach their invite creted while not auth to their account when they do log in
-  template    String
-  names       String
-  weddingDate DateTime
-  venue       String
-  rsvpLink    String?
-  isPaid Boolean @default(false) // ← to use when billing is enabled 
-  deletedAt   DateTime? // ← For soft-deleting individual invitations
+  id           String        @id @default(uuid())
+  userId       String?
+  user         User?         @relation(fields: [userId], references: [id])
+  guestId      String?
+  templateId   Int
+  template     Template      @relation(fields: [templateId], references: [id])
+  isPaid       Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  filledFields FilledField[]
+}
+
+model FilledField {
+  id           String        @id @default(uuid())
+  invitationId String
+  fieldId      String
+  value        String
+  invitation   Invitation    @relation(fields: [invitationId], references: [id])
+  field        TemplateField @relation(fields: [fieldId], references: [id])
+}
+
+model Template {
+  id          Int             @id @default(autoincrement())
+  name        String
+  description String?
+  imageUrl    String?
+  fields      TemplateField[]
+  invitations Invitation[]
+}
+
+model TemplateField {
+  id          String        @id @default(uuid())
+  templateId  Int
+  name        String
+  label       String
+  isEditable  Boolean       @default(true)
+  defaultText String?
+  template    Template      @relation(fields: [templateId], references: [id])
+  FilledField FilledField[]
 }

@@ -15,7 +15,10 @@ const user_routes_1 = __importDefault(require("./routes/user.routes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 exports.app = app;
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: "http://localhost:3000", // allow Nuxt frontend
+    credentials: true, // optional, for cookies/auth headers
+}));
 app.use(express_1.default.json());
 app.use("/api/auth", auth_routes_1.default);
 app.use("/api/invitations", invitation_routes_1.default);

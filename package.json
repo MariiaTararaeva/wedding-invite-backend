@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "ts-node-dev src/server.ts"
+    "dev": "ts-node-dev src/server.ts",
+    "db:seed": "ts-node --esm prisma/seed.ts"
   },
   "keywords": [],
   "author": "",

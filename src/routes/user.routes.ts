@@ -1,16 +1,16 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { User } from "@prisma/client"; // import the User type from Prisma for UpdateData
-import { PrismaClient } from "@prisma/client";
+import { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import prisma from "../../prisma/client";
+import { isAuthenticated } from "../middleware/route-guard-middleware";
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // GET all users
 router.get("/", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const users = await prisma.user.findMany(); // fetch all users
-    if (!users || users.length === 0) {
+    const users = await prisma.user.findMany();
+    if (!users.length) {
       res.status(404).json({ message: "No users found" });
       return;
     }
@@ -20,9 +20,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction): Promise
   }
 });
 
-import { isAuthenticated } from "../middleware/route-guard-middleware";
-
-// GET one user by ID with invitations [protected with isAuthenticated]
+// GET one user by ID with invitations
 router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { id } = req.params;
   const requesterId = req.userId;
@@ -34,9 +32,8 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: Ne
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: Number(id) },
-      include: {
-        invitations: true}, // include the user's invitations in the response for my profile page
+      where: { id },
+      include: { invitations: true },
     });
 
     if (!user) {
@@ -53,10 +50,10 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response, next: Ne
 // PUT /api/users/:id
 router.put("/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const userId = req.userId;
-  const id = parseInt(req.params.id);
+  const { id } = req.params;
   const { email, password } = req.body;
 
-  if (userId !== id) {
+  if (userId !== Number(id)) {
     res.status(403).json({ message: "Access denied" });
     return;
   }
@@ -68,10 +65,7 @@ router.put("/:id", isAuthenticated, async (req: Request, res: Response, next: Ne
       return;
     }
 
-    // Prepare update object
-    // const updateData: any = {};
     const updateData: Partial<User> = {};
-
 
     if (email && email !== existing.email) {
       updateData.email = email;
@@ -103,45 +97,41 @@ router.put("/:id", isAuthenticated, async (req: Request, res: Response, next: Ne
 // DELETE /api/users/:id
 router.delete("/:id", isAuthenticated, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const userId = req.userId;
-  const id = parseInt(req.params.id);
+  const { id } = req.params;
 
-  if (userId !== id) {
+  if (userId !== Number(id)) {
     res.status(403).json({ message: "Access denied" });
     return;
   }
 
   try {
     const existing = await prisma.user.findUnique({ where: { id } });
-    
     if (!existing || existing.deletedAt !== null) {
       res.status(404).json({ message: "User not found or already deleted" });
       return;
     }
 
     const deletedUser = await prisma.user.delete({ where: { id } });
-// Define a type for the new user object with password removed - Give me everything in the User type except the password field.
     const { password, ...safeUser } = deletedUser;
 
-    
     res.json({ message: "User deleted successfully", deleted: safeUser });
   } catch (error) {
     next(error);
   }
 });
 
-// Soft-delete user
+// SOFT DELETE /api/users/:id/deactivate
 router.delete("/:id/deactivate", isAuthenticated, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const userId = req.userId;
-  const id = parseInt(req.params.id);
+  const { id } = req.params;
 
-  if (userId !== id) {
+  if (userId !== Number(id)) {
     res.status(403).json({ message: "Access denied" });
     return;
   }
 
-  try {
+  try {                     
     const existing = await prisma.user.findUnique({ where: { id } });
-
     if (!existing || existing.deletedAt !== null) {
       res.status(404).json({ message: "User not found or already deleted" });
       return;
@@ -149,7 +139,7 @@ router.delete("/:id/deactivate", isAuthenticated, async (req: Request, res: Resp
 
     const updated = await prisma.user.update({
       where: { id },
-      data: { deletedAt: new Date() },
+      data: { deletedAt: new Date() },     
     });
 
     res.json({ message: "User soft-deleted successfully", deletedUserId: updated.id });

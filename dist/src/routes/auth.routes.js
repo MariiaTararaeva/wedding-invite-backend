@@ -36,13 +36,25 @@ router.post("/signup", (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         const newUser = yield client_1.default.user.create({
             data: { email, password: hashedPassword },
         });
+        // Link guest invitations if a guestId exists
         if (guestId) {
             yield client_1.default.invitation.updateMany({
                 where: { userId: null, guestId },
                 data: { userId: newUser.id, guestId: null },
             });
-        } // Update invitations created as guest with the new user ID when a guest signs up
-        res.status(201).json({ user: { id: newUser.id, email: newUser.email }, message: "User created" });
+        }
+        // Generate a JWT token just like in login
+        const payload = { userId: newUser.id, email: newUser.email };
+        const token = jsonwebtoken_1.default.sign(payload, process.env.TOKEN_SECRET, {
+            algorithm: "HS256",
+            expiresIn: "6h",
+        });
+        // Return the token + user to the frontend
+        res.status(201).json({
+            user: { id: newUser.id, email: newUser.email },
+            token,
+            message: "User created"
+        });
     }
     catch (err) {
         next(err);
