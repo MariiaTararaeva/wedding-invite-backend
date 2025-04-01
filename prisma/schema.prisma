@@ -18,13 +18,13 @@ model User {
 model Invitation {
   id           String        @id @default(uuid())
   userId       String?
-  user         User?         @relation(fields: [userId], references: [id])
-  guestId      String?
-  templateId   Int
-  template     Template      @relation(fields: [templateId], references: [id])
   isPaid       Boolean       @default(false)
+  guestId      String?
   createdAt    DateTime      @default(now())
+  templateId   Int
   filledFields FilledField[]
+  template     Template      @relation(fields: [templateId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id])
 }
 
 model FilledField {
@@ -32,8 +32,8 @@ model FilledField {
   invitationId String
   fieldId      String
   value        String
-  invitation   Invitation    @relation(fields: [invitationId], references: [id])
   field        TemplateField @relation(fields: [fieldId], references: [id])
+  invitation   Invitation    @relation(fields: [invitationId], references: [id])
 }
 
 model Template {
@@ -41,8 +41,8 @@ model Template {
   name        String
   description String?
   imageUrl    String?
-  fields      TemplateField[]
   invitations Invitation[]
+  fields      TemplateField[]
 }
 
 model TemplateField {
@@ -52,6 +52,6 @@ model TemplateField {
   label       String
   isEditable  Boolean       @default(true)
   defaultText String?
-  template    Template      @relation(fields: [templateId], references: [id])
   FilledField FilledField[]
+  template    Template      @relation(fields: [templateId], references: [id])
 }
