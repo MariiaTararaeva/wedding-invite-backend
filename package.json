@@ -1,12 +1,13 @@
 {
   "name": "wedding-invite-app",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "server.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "ts-node-dev src/server.ts",
-    "db:seed": "ts-node --esm prisma/seed.ts"
+    "start": "node dist/server.ts",
+   "dev": "tsx src/server.ts",
+    "db:seed": "node --loader ts-node/esm prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -39,6 +40,7 @@
     "prisma": "^6.5.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
+    "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   }
 }

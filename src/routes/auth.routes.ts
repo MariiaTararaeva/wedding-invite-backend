@@ -2,12 +2,12 @@ import express, { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../../prisma/client";
-import { isAuthenticated } from "../middleware/route-guard-middleware";
+import { isAuthenticated } from "../middleware/auth.middleware";
 
 const router = express.Router();
 
 interface AuthenticatedRequest extends Request {
-  tokenPayload?: { userId: number; email: string };
+  tokenPayload?: { userId: string; email: string };
 }
 
 // Signup
@@ -109,11 +109,11 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
 router.get("/verify", isAuthenticated, async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise< void> => {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: Number(req.tokenPayload?.userId) },
+      where: { id: (req.tokenPayload?.userId) },
       select: { id: true, email: true },
     });
 
-     res.json({ user: user + "my user" });
+     res.json(user);
   } catch (err) {
     next(err);
   }

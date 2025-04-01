@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import prisma from "../../prisma/client";
-import { isAuthenticated } from "../middleware/route-guard-middleware";
+import { isAuthenticated } from "../middleware/auth.middleware";
 
 const router = Router();
 

@@ -7,11 +7,15 @@ import invitationRoutes from "./routes/invitations.routes";
 import { errorHandler } from "./error-handling";
 import userRoutes from "./routes/user.routes";
 import templatesRouter from './routes/templates.routes'
+import configureMiddleware from './middleware/configureMiddleware';
 
 
 dotenv.config();
 
 const app = express();
+
+configureMiddleware(app);
+
 app.use(cors({
   origin: "http://localhost:3000", // allow Nuxt frontend
   credentials: true, // optional, for cookies/auth headers

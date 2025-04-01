@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import jwt, { JsonWebTokenError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+//tsx installed due to commonJS and ts issues 
 
 declare module "express-serve-static-core" {
   interface Request {
@@ -11,6 +12,7 @@ interface TokenPayload {
   userId: number;
 }
 
+const { JsonWebTokenError } = jwt as any;// to avoid TypeScript error with jwt being in CommonJs
 export const isAuthenticated = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -38,4 +40,5 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
       throw err;
     }
   };
+  
   
